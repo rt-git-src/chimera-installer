@@ -18,7 +18,7 @@ lsblk -I 8,253,254,259
 # User choices
 
 clear_user_choices() {
-  unset disk password_encryption user_name password_admin host_name processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required swap_size zram_size bootloader
+  unset disk password_encryption user_groups user_name password_admin host_name processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required swap_size zram_size bootloader
 }
 
 clear_user_choices
@@ -140,6 +140,7 @@ while [ -z "$is_virtual_machine_manager_required" ]; do
     ''|'Y'|'y')
       is_virtual_machine_manager_required=true
       packages="$packages qemu-system-x86_64 libvirt virt-manager iptables"
+      user_groups="$user_groups,kvm,libvirt"
       ;;
     'N'|'n')
       is_virtual_machine_manager_required=false
@@ -219,7 +220,7 @@ mount "/dev/$disk_partition_1" /media/root/boot
 chimera-bootstrap /media/root
 chimera-chroot /media/root << EOF
 echo -n "$password_admin" | passwd --stdin root
-useradd --create-home -G wheel,kvm,plugdev "$user_name"
+useradd --create-home -G "wheel,plugdev,$user_groups" "$user_name"
 echo -n "$password_admin" | passwd --stdin "$user_name"
 echo "$host_name" > /etc/hostname
 echo y | apk add chimera-repo-user
