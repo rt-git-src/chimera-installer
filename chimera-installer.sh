@@ -152,6 +152,20 @@ while [ -z "$is_virtual_machine_manager_required" ]; do
   esac
 done
 echo ''
+while [ -z "$file_system" ]; do
+  printf 'Choose fyle system for root partition:\n  1) ext4\n  2) btrfs\n  3) f2fs\n'
+  read -r file_system
+  case $file_system in
+    '1') file_system='ext4';;
+    '2') file_system='btrfs';;
+    '3') file_system='f2fs';;
+    *)
+      echo 'This is not an option!'
+      unset file_system
+      ;;
+  esac
+done
+echo ''
 while ! [ "$swap_size" -ge 0 ] 2>/dev/null; do
   read -rp 'Swap size in Gb (type 0 for none): ' swap_size
 done
@@ -200,7 +214,15 @@ EOF
 mkfs.vfat "/dev/$disk_partition_1"
 echo -n "$password_encryption" | cryptsetup luksFormat "/dev/$disk_partition_2"
 echo -n "$password_encryption" | cryptsetup luksOpen "/dev/$disk_partition_2" cryptroot
-mkfs.f2fs /dev/mapper/cryptroot
+case $file_system in
+  'ext4') mkfs.ext4 /dev/mapper/cryptroot;;
+  'btrfs') mkfs.btrfs /dev/mapper/cryptroot;;
+  'f2fs') mkfs.f2fs /dev/mapper/cryptroot;;
+  *)
+    echo 'ERROR: File system is not set'
+    exit 1
+    ;;
+esac
 if [ ! -e "/dev/$disk_partition_1" ] || [ ! -e "/dev/$disk_partition_2" ] || [ ! -e /dev/mapper/cryptroot ]; then
   printf "Disk $disk partitioning failed!\n\n"
   lsblk -I 8,253,254,259
