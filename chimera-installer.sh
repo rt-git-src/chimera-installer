@@ -202,7 +202,7 @@ echo -n "$password_encryption" | cryptsetup luksFormat "/dev/$disk_partition_2"
 echo -n "$password_encryption" | cryptsetup luksOpen "/dev/$disk_partition_2" cryptroot
 case $file_system in
   'ext4') mkfs.ext4 /dev/mapper/cryptroot;;
-  'btrfs') mkfs.btrfs /dev/mapper/cryptroot;;
+  'btrfs') mkfs.btrfs --force /dev/mapper/cryptroot;;
   'f2fs') mkfs.f2fs /dev/mapper/cryptroot;;
   *) printf "\nERROR: File system is not chosen\n\n"; exit 1;;
 esac
