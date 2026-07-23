@@ -15,7 +15,9 @@ Your current disks and partitions:
 EOF
 lsblk -I 8,253,254,259
 
-# User choices
+######################
+# User choices start #
+######################
 
 clear_user_choices() {
   unset disk password_encryption user_groups user_name password_admin host_name processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required swap_size zram_size bootloader
@@ -193,7 +195,11 @@ while [ -z "$bootloader" ]; do
   esac
 done
 
-# Disk partitioning
+####################
+# User choices end #
+###########################
+# Disk partitioning start #
+###########################
 
 wipefs -a "/dev/$disk"
 fdisk "/dev/$disk" << EOF
@@ -229,7 +235,11 @@ if [ ! -e "/dev/$disk_partition_1" ] || [ ! -e "/dev/$disk_partition_2" ] || [ !
   exit 1
 fi
 
-# Partition mounting
+#########################
+# Disk partitioning end #
+############################
+# Partition mounting start #
+############################
 
 mkdir /media/root
 mount /dev/mapper/cryptroot /media/root
@@ -237,7 +247,11 @@ chmod 755 /media/root
 mkdir /media/root/boot
 mount "/dev/$disk_partition_1" /media/root/boot
 
-# Installation
+##########################
+# Partition mounting end #
+##########################
+# Installation start #
+######################
 
 chimera-bootstrap /media/root
 chimera-chroot /media/root << EOF
@@ -294,13 +308,22 @@ case $bootloader in
 esac
 EOF
 
-# Finalizing
+####################
+# Installation end #
+####################
+# Finalizing start #
+####################
 
 clear_user_choices
 unset clear_user_choices
 rm -f /media/root/.sh_history
 umount -R /media/root
 cryptsetup luksClose /dev/mapper/cryptroot
+
+##################
+# Finalizing end #
+##################
+
 cat << EOF
 
 ###########################################
