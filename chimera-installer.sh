@@ -23,10 +23,14 @@ cat << EOF
 
 EOF
 clear_user_choices() {
-  unset disk password_encryption user_groups user_name password_admin host_name processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required swap_size zram_size bootloader
+  unset disk password_encryption user_groups user_name password_admin host_name packages processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required file_system swap_size zram_size bootloader
 }
-
+set_defaults() {
+  user_groups="wheel,plugdev"
+  packages="cryptsetup-scripts dbus networkmanager networkmanager-openvpn bluez pipewire xserver-xorg-minimal xdg-user-dirs"
+}
 clear_user_choices
+set_defaults
 echo ''
 while [ -z "$disk" ] || [ ! -e "/dev/$disk" ]; do
   read -rp 'Enter a valid disk name (e.g. sda or nvme0n1): ' disk
@@ -238,12 +242,12 @@ EOF
 chimera-bootstrap /media/root
 chimera-chroot /media/root << EOF
 echo -n "$password_admin" | passwd --stdin root
-useradd --create-home -G "wheel,plugdev,$user_groups" "$user_name"
+useradd --create-home -G "$user_groups" "$user_name"
 echo -n "$password_admin" | passwd --stdin "$user_name"
 echo "$host_name" > /etc/hostname
 echo y | apk add chimera-repo-user
 apk update
-echo y | apk add cryptsetup-scripts dbus networkmanager networkmanager-openvpn bluez pipewire xserver-xorg-minimal xdg-user-dirs $packages
+echo y | apk add $packages
 dinitctl -o enable networkmanager
 dinitctl -o enable bluetoothd
 case $desktop_environment in
