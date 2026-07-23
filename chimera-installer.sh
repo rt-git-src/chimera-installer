@@ -68,10 +68,7 @@ while [ -z "$processor_microcode" ]; do
     '1') ;;
     '2') packages="$packages ucode-amd";;
     '3') packages="$packages ucode-intel";;
-    *)
-      echo 'This is not an option!'
-      unset processor_microcode
-      ;;
+    *) echo 'This is not an option!'; unset processor_microcode;;
   esac
 done
 echo ''
@@ -82,10 +79,7 @@ while [ -z "$kernel_selection" ]; do
     '1') packages="$packages linux-lts";;
     '2') packages="$packages linux-stable";;
     '3') packages="$packages linux-lts linux-stable";;
-    *)
-      echo 'This is not an option!'
-      unset kernel_selection
-      ;;
+    *) echo 'This is not an option!'; unset kernel_selection;;
   esac
 done
 echo ''
@@ -112,10 +106,7 @@ while [ -z "$desktop_environment" ]; do
       desktop_environment='kde-minimal'
       packages="$packages sddm plasma-desktop !plasma-desktop-x11-meta !plasma-desktop-apps-meta !plasma-desktop-games-meta !plasma-desktop-multimedia-meta !plasma-desktop-devtools-meta !plasma-desktop-accessibility-meta !plasma-desktop-kdepim-meta ark dolphin kitty wl-clipboard"
       ;;
-    *)
-      echo 'This is not an option!'
-      unset desktop_environment
-      ;;
+    *) echo 'This is not an option!'; unset desktop_environment;;
   esac
 done
 echo ''
@@ -126,13 +117,8 @@ while [ -z "$is_flatpak_required" ]; do
       is_flatpak_required=true
       packages="$packages flatpak"
       ;;
-    'N'|'n')
-      is_flatpak_required=false
-      ;;
-    *)
-      echo 'This is not an option!'
-      unset is_flatpak_required
-      ;;
+    'N'|'n') is_flatpak_required=false;;
+    *) echo 'This is not an option!'; unset is_flatpak_required;;
   esac
 done
 echo ''
@@ -144,13 +130,8 @@ while [ -z "$is_virtual_machine_manager_required" ]; do
       packages="$packages qemu-system-x86_64 libvirt virt-manager iptables"
       user_groups="$user_groups,kvm,libvirt"
       ;;
-    'N'|'n')
-      is_virtual_machine_manager_required=false
-      ;;
-    *)
-      echo 'This is not an option!'
-      unset is_virtual_machine_manager_required
-      ;;
+    'N'|'n') is_virtual_machine_manager_required=false;;
+    *) echo 'This is not an option!'; unset is_virtual_machine_manager_required;;
   esac
 done
 echo ''
@@ -161,10 +142,7 @@ while [ -z "$file_system" ]; do
     '1') file_system='ext4';;
     '2') file_system='btrfs';;
     '3') file_system='f2fs';;
-    *)
-      echo 'This is not an option!'
-      unset file_system
-      ;;
+    *) echo 'This is not an option!'; unset file_system;;
   esac
 done
 echo ''
@@ -188,10 +166,7 @@ while [ -z "$bootloader" ]; do
       bootloader='systemd-boot'
       packages="$packages systemd-boot"
       ;;
-    *)
-      echo 'This is not an option!'
-      unset bootloader
-      ;;
+    *) echo 'This is not an option!'; unset bootloader;;
   esac
 done
 
@@ -224,13 +199,10 @@ case $file_system in
   'ext4') mkfs.ext4 /dev/mapper/cryptroot;;
   'btrfs') mkfs.btrfs /dev/mapper/cryptroot;;
   'f2fs') mkfs.f2fs /dev/mapper/cryptroot;;
-  *)
-    echo 'ERROR: File system is not set'
-    exit 1
-    ;;
+  *) printf "\nERROR: File system is not chosen\n\n"; exit 1;;
 esac
 if [ ! -e "/dev/$disk_partition_1" ] || [ ! -e "/dev/$disk_partition_2" ] || [ ! -e /dev/mapper/cryptroot ]; then
-  printf "Disk $disk partitioning failed!\n\n"
+  printf "\nERROR: Disk $disk partitioning failed\n\n"
   lsblk -I 8,253,254,259
   exit 1
 fi
@@ -241,11 +213,11 @@ fi
 # Partition mounting start #
 ############################
 
-mkdir /media/root
-mount /dev/mapper/cryptroot /media/root
-chmod 755 /media/root
-mkdir /media/root/boot
-mount "/dev/$disk_partition_1" /media/root/boot
+mkdir -p /media/root/boot \
+&& mount /dev/mapper/cryptroot /media/root \
+&& chmod 755 /media/root \
+&& mount "/dev/$disk_partition_1" /media/root/boot \
+|| printf "\nERROR: Partition mounting failed\n\n"; exit 1
 
 ##########################
 # Partition mounting end #
