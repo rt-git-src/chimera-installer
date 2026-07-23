@@ -1,6 +1,7 @@
 #!/bin/sh -e
 
 cat << EOF
+
 #################################################################
 ###                                                           ###
 ###       Welcome to the Chimera Linux install script!        ###
@@ -14,11 +15,13 @@ Your current disks and partitions:
 
 EOF
 lsblk -I 8,253,254,259
+cat << EOF
 
 ######################
 # User choices start #
 ######################
 
+EOF
 clear_user_choices() {
   unset disk password_encryption user_groups user_name password_admin host_name processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required swap_size zram_size bootloader
 }
@@ -169,6 +172,7 @@ while [ -z "$bootloader" ]; do
     *) echo 'This is not an option!'; unset bootloader;;
   esac
 done
+cat << EOF
 
 ####################
 # User choices end #
@@ -176,6 +180,7 @@ done
 # Disk partitioning start #
 ###########################
 
+EOF
 wipefs -a "/dev/$disk"
 fdisk "/dev/$disk" << EOF
 g
@@ -206,6 +211,7 @@ if [ ! -e "/dev/$disk_partition_1" ] || [ ! -e "/dev/$disk_partition_2" ] || [ !
   lsblk -I 8,253,254,259
   exit 1
 fi
+cat << EOF
 
 #########################
 # Disk partitioning end #
@@ -213,12 +219,14 @@ fi
 # Partition mounting start #
 ############################
 
+EOF
 mkdir -p /media/root \
 && mount /dev/mapper/cryptroot /media/root \
 && chmod 755 /media/root \
 && mkdir -p /media/root/boot \
 && mount "/dev/$disk_partition_1" /media/root/boot \
 || printf "\nERROR: Partition mounting failed\n\n"; exit 1
+cat << EOF
 
 ##########################
 # Partition mounting end #
@@ -226,6 +234,7 @@ mkdir -p /media/root \
 # Installation start #
 ######################
 
+EOF
 chimera-bootstrap /media/root
 chimera-chroot /media/root << EOF
 echo -n "$password_admin" | passwd --stdin root
@@ -280,6 +289,7 @@ case $bootloader in
     ;;
 esac
 EOF
+cat << EOF
 
 ####################
 # Installation end #
@@ -287,16 +297,19 @@ EOF
 # Finalizing start #
 ####################
 
+EOF
 clear_user_choices
 unset clear_user_choices
 rm -f /media/root/.sh_history
 umount -R /media/root
 cryptsetup luksClose /dev/mapper/cryptroot
+cat << EOF
 
 ##################
 # Finalizing end #
 ##################
 
+EOF
 cat << EOF
 
 ###########################################
@@ -304,4 +317,5 @@ cat << EOF
 ###   Chimera Linux is ready to boot!   ###
 ###                                     ###
 ###########################################
+
 EOF
