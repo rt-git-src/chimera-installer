@@ -22,6 +22,10 @@ cat << EOF
 ######################
 
 EOF
+umount_all() {
+  umount -R /media/root || true
+  cryptsetup luksClose /dev/mapper/cryptroot || true
+}
 clear_user_choices() {
   unset disk password_encryption user_groups user_name password_admin host_name packages processor_microcode kernel_selection desktop_environment is_flatpak_required is_virtual_machine_manager_required file_system swap_size zram_size bootloader
 }
@@ -29,6 +33,7 @@ set_defaults() {
   user_groups="wheel,plugdev"
   packages="cryptsetup-scripts dbus networkmanager networkmanager-openvpn bluez pipewire xserver-xorg-minimal xdg-user-dirs"
 }
+umount_all
 clear_user_choices
 set_defaults
 echo ''
@@ -305,8 +310,7 @@ EOF
 clear_user_choices
 unset clear_user_choices
 rm -f /media/root/.sh_history
-umount -R /media/root
-cryptsetup luksClose /dev/mapper/cryptroot
+umount_all
 cat << EOF
 
 ##################
