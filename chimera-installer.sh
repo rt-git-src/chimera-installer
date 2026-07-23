@@ -213,9 +213,10 @@ fi
 # Partition mounting start #
 ############################
 
-mkdir -p /media/root/boot \
+mkdir -p /media/root \
 && mount /dev/mapper/cryptroot /media/root \
 && chmod 755 /media/root \
+&& mkdir -p /media/root/boot \
 && mount "/dev/$disk_partition_1" /media/root/boot \
 || printf "\nERROR: Partition mounting failed\n\n"; exit 1
 
